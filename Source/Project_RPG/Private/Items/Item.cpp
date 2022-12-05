@@ -4,15 +4,14 @@
 #include "Items/Item.h"
 #include "Project_RPG/DebugMacros.h"
 
-// Sets default values
 AItem::AItem()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
 
+	PrimaryActorTick.bCanEverTick = true;
+	ItemMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ItemMeshComponent"));
+	RootComponent = ItemMesh;
 }
 
-// Called when the game starts or when spawned
 void AItem::BeginPlay()
 {
 	Super::BeginPlay();
@@ -20,7 +19,6 @@ void AItem::BeginPlay()
 	if(GEngine)
 	{
 		//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("before check")));
-
 	UWorld* World = GetWorld();
 	FVector Forward = GetActorForwardVector();
 	FVector Location = GetActorLocation();
@@ -30,7 +28,21 @@ void AItem::BeginPlay()
 	}
 }
 
-// Called every frame
+float AItem::TransformedSin()
+{
+	return Amplitude * FMath::Sin(RunningTime * TimeConstant);
+}
+float AItem::TransformedCos()
+{
+	return Amplitude * FMath::Cos(RunningTime * TimeConstant);
+}
+
+template<typename T>
+inline T AItem::Avg(T First, T Second)
+{
+	return (First + Second) / 2;
+}
+
 void AItem::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
