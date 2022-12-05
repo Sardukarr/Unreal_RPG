@@ -11,6 +11,8 @@ class UCapsuleComponent;
 class USkeletalMeshComponent;
 class USpringArmComponent;
 class UCameraComponent;
+class UInputMappingContext;
+
 UCLASS()
 class PROJECT_RPG_API ABird : public APawn
 {
@@ -26,6 +28,9 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+
+	UPROPERTY(EditAnywhere,BlueprintReadOnly,Category=Input)
+	UInputMappingContext* BirdMappingContext;
 
 	void MoveForward(float Value);
 	void MoveRight(float Value);

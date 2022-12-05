@@ -6,6 +6,7 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
+#include "EnhancedInputSubsystems.h"
 
 ABird::ABird()
 {
@@ -33,6 +34,11 @@ ABird::ABird()
 void ABird::BeginPlay()
 {
 	Super::BeginPlay();
+	APlayerController* PC = Cast< APlayerController>(GetController());
+	if (PC)
+	{
+		//if(UEnhancedInputLocalPlayerSubsystem )
+	}
 	
 }
 
