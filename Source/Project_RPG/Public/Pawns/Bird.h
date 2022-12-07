@@ -12,7 +12,8 @@ class USkeletalMeshComponent;
 class USpringArmComponent;
 class UCameraComponent;
 class UInputMappingContext;
-
+class UInputAction;
+struct FInputActionValue;
 UCLASS()
 class PROJECT_RPG_API ABird : public APawn
 {
@@ -31,12 +32,20 @@ protected:
 
 	UPROPERTY(EditAnywhere,BlueprintReadOnly,Category=Input)
 	UInputMappingContext* BirdMappingContext;
-
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
+	UInputAction* MoveAction;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
+	UInputAction* LookAction;
+	// old input mapping
 	void MoveForward(float Value);
 	void MoveRight(float Value);
 	void Turn(float Value);
 	void LookUp(float Value);
 
+
+	//new Enhenced Input
+	void Move(const FInputActionValue& Value);
+	void Look(const FInputActionValue& Value);
 private:
 	UPROPERTY(VisibleAnywhere)
 	UCapsuleComponent* Capsule;

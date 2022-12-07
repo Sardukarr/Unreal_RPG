@@ -4,9 +4,11 @@
 #include "Pawns/Bird.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "Components/InputComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "EnhancedInputComponent.h"
 
 ABird::ABird()
 {
@@ -34,10 +36,12 @@ ABird::ABird()
 void ABird::BeginPlay()
 {
 	Super::BeginPlay();
-	APlayerController* PC = Cast< APlayerController>(GetController());
-	if (PC)
+	if (APlayerController* PC = Cast< APlayerController>(GetController()))
 	{
-		//if(UEnhancedInputLocalPlayerSubsystem )
+		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem< UEnhancedInputLocalPlayerSubsystem>(PC->GetLocalPlayer()))
+		{
+			Subsystem->AddMappingContext(BirdMappingContext, 0);
+		}
 	}
 	
 }
@@ -71,6 +75,34 @@ void ABird::LookUp(float Value)
 	AddControllerPitchInput(Value);
 }
 
+void ABird::Move(const FInputActionValue& Value)
+{
+	FVector2D moveValue=Value.Get<FVector2D>();
+
+	if (Controller)
+	{
+		if (moveValue.X != 0.f)
+		{
+			AddMovementInput(GetActorRightVector(), moveValue.X);
+		}
+		if (moveValue.Y != 0.f)
+		{
+			AddMovementInput(GetActorForwardVector(), moveValue.Y);
+		}
+	}
+}
+
+void ABird::Look(const FInputActionValue& Value)
+{
+	FVector2D AxisValue = Value.Get<FVector2D>();
+
+	if (Controller)
+	{
+		AddControllerYawInput(AxisValue.X);
+		AddControllerPitchInput(AxisValue.Y);
+	}
+}
+
 void ABird::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
@@ -81,9 +113,17 @@ void ABird::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-	PlayerInputComponent->BindAxis(FName("MoveForward"), this, &ABird::MoveForward);
-	PlayerInputComponent->BindAxis(FName("MoveRight"), this, &ABird::MoveRight);
-	PlayerInputComponent->BindAxis(FName("Turn"), this, &ABird::Turn);
-	PlayerInputComponent->BindAxis(FName("LookUp"), this, &ABird::LookUp);
+	//old way
+
+	//PlayerInputComponent->BindAxis(FName("MoveForward"), this, &ABird::MoveForward);
+	//PlayerInputComponent->BindAxis(FName("MoveRight"), this, &ABird::MoveRight);
+	//PlayerInputComponent->BindAxis(FName("Turn"), this, &ABird::Turn);
+	//PlayerInputComponent->BindAxis(FName("LookUp"), this, &ABird::LookUp);
+
+	if (UEnhancedInputComponent* EIC = CastChecked<UEnhancedInputComponent>(PlayerInputComponent))
+	{
+		EIC->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ABird::Move);
+		EIC->BindAction(LookAction, ETriggerEvent::Triggered, this, &ABird::Look);
+	}
 }
 
