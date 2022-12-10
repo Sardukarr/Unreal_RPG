@@ -3,9 +3,9 @@
 
 #include "Characters/MainCharacterAnimInstance.h"
 #include "Characters/MainCharacter.h"
+
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
-
 
 void UMainCharacterAnimInstance::NativeInitializeAnimation()
 {
@@ -26,5 +26,6 @@ void UMainCharacterAnimInstance::NativeUpdateAnimation(float DeltaTime)
 	{
 		GroundSpeed = UKismetMathLibrary::VSizeXY(MainCharacterMovement->Velocity);
 		IsFalling = MainCharacterMovement->IsFalling();
+		CharacterState = MainCharacter->GetCharacterState();
 	}
 }

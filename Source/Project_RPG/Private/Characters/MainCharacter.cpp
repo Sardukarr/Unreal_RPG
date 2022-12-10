@@ -9,6 +9,7 @@
 
 #include "GroomComponent.h"
 #include "Camera/CameraComponent.h"
+#include "Items/Weapons/Weapon.h"
 
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
@@ -101,6 +102,14 @@ void AMainCharacter::Look(const FInputActionValue& Value)
 		AddControllerPitchInput(AxisValue.Y);
 	}
 }
+void AMainCharacter::Equip()
+{
+	if(AWeapon* Weapon = Cast<AWeapon>(OverlappingItem))
+	{
+		Weapon->Equip(GetMesh(), FName("RightHandSocket"));
+		CharacterState = ECharacterState::ECS_EquippedOneHandedWeapon;
+	}
+}
 void AMainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
@@ -110,6 +119,7 @@ void AMainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 		EIC->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AMainCharacter::Move);
 		EIC->BindAction(LookAction, ETriggerEvent::Triggered, this, &AMainCharacter::Look);
 		EIC->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ACharacter::Jump);
+		EIC->BindAction(EquipAction, ETriggerEvent::Triggered, this, &AMainCharacter::Equip);
 	}
 
 }

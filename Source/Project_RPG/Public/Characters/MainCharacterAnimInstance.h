@@ -4,11 +4,14 @@
 
 #include "CoreMinimal.h"
 #include "Animation/AnimInstance.h"
+#include "Characters/CharacterTypes.h"
 #include "MainCharacterAnimInstance.generated.h"
 
 /**
  * 
  */
+
+
 UCLASS()
 class PROJECT_RPG_API UMainCharacterAnimInstance : public UAnimInstance
 {
@@ -28,4 +31,6 @@ public:
 
 	UPROPERTY(BlueprintReadOnly, Category = Movement)
 	bool IsFalling;
+
+	ECharacterState CharacterState;
 };

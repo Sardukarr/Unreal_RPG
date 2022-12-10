@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "CharacterTypes.h"
 #include "MainCharacter.generated.h"
 
 
@@ -12,6 +13,8 @@
 class USpringArmComponent;
 class UCameraComponent;
 class UGroomComponent;
+
+class AItem;
 
 class UInputMappingContext;
 class UInputAction;
@@ -34,15 +37,18 @@ protected:
 
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
+	void Equip();
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
-		UInputMappingContext* MappingContext;
+	UInputMappingContext* MappingContext;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
-		UInputAction* MoveAction;
+	UInputAction* MoveAction;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
-		UInputAction* LookAction;
+	UInputAction* LookAction;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
-		UInputAction* JumpAction;
+	UInputAction* JumpAction;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
+	UInputAction* EquipAction;
 
 private:
 	UPROPERTY(VisibleAnywhere)
@@ -55,4 +61,13 @@ private:
 	UGroomComponent* Hair;
 	UPROPERTY(VisibleAnywhere, Category = Hair)
 	UGroomComponent* Eyebrows;
+
+	UPROPERTY(VisibleInstanceOnly)
+	AItem* OverlappingItem;
+
+	ECharacterState CharacterState = ECharacterState::ECS_Unequipped;
+
+public:
+	FORCEINLINE void SetOverlappingItem(AItem* Item) { OverlappingItem = Item; }
+	FORCEINLINE ECharacterState GetCharacterState() const { return CharacterState; }
 };
