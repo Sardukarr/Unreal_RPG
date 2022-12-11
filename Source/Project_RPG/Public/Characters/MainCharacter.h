@@ -13,7 +13,7 @@
 class USpringArmComponent;
 class UCameraComponent;
 class UGroomComponent;
-
+class UAnimMontage;
 class AItem;
 
 class UInputMappingContext;
@@ -31,13 +31,23 @@ public:
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+
+
 protected:
 
 	virtual void BeginPlay() override;
 
+	/**
+	* Enhanced input Action to do
+	*/
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
 	void Equip();
+	void Attack();
+
+	/**
+	* Enhanced input action mapping
+	*/
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	UInputMappingContext* MappingContext;
@@ -49,8 +59,18 @@ protected:
 	UInputAction* JumpAction;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	UInputAction* EquipAction;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
+	UInputAction* AttackAction;
+
+	/**
+	* Animations
+	*/
+	void PlayMontage(UAnimMontage* montage, FName sectionName = FName(NAME_None), bool bOverride = false);
+	UFUNCTION(BlueprintCallable)
+	void AttackEnd();
 
 private:
+	bool CanAttack();
 	UPROPERTY(VisibleAnywhere)
 	USpringArmComponent* CameraBoom;
 
@@ -59,15 +79,22 @@ private:
 
 	UPROPERTY(VisibleAnywhere, Category = Hair)
 	UGroomComponent* Hair;
+
 	UPROPERTY(VisibleAnywhere, Category = Hair)
 	UGroomComponent* Eyebrows;
 
 	UPROPERTY(VisibleInstanceOnly)
 	AItem* OverlappingItem;
 
+	UPROPERTY(EditDefaultsOnly, Category = Animations)
+	UAnimMontage* AttackMontage;
+
 	ECharacterState CharacterState = ECharacterState::ECS_Unequipped;
+	UPROPERTY(BlueprintReadWrite, meta=(AllowPrivateAccess="true"))
+	EActionState ActionState = EActionState::EAS_Unoccupied;
 
 public:
 	FORCEINLINE void SetOverlappingItem(AItem* Item) { OverlappingItem = Item; }
 	FORCEINLINE ECharacterState GetCharacterState() const { return CharacterState; }
+	FORCEINLINE EActionState GetActionState() const { return ActionState; }
 };

@@ -63,6 +63,7 @@ void AMainCharacter::Tick(float DeltaTime)
 
 void AMainCharacter::Move(const FInputActionValue& Value)
 {
+	if (ActionState == EActionState::EAS_Attacking) return;
 	FVector2D moveValue = Value.Get<FVector2D>();
 
 	if (Controller)
@@ -110,6 +111,52 @@ void AMainCharacter::Equip()
 		CharacterState = ECharacterState::ECS_EquippedOneHandedWeapon;
 	}
 }
+void AMainCharacter::Attack()
+{
+	if (CanAttack())
+	{
+	FName SectionName = FName();
+	int32 Selection = FMath::RandRange(0, 1);
+
+	switch (Selection)
+		{
+		case 0:
+			SectionName = FName("Attack1");
+			break;
+		case 1:
+			SectionName = FName("Attack2");
+			break;
+		default:
+			break;
+		}
+
+		PlayMontage(AttackMontage, SectionName);
+		ActionState = EActionState::EAS_Attacking;
+	}
+}
+
+bool AMainCharacter::CanAttack()
+{
+	return AttackMontage && ActionState == EActionState::EAS_Unoccupied && CharacterState!=ECharacterState::ECS_Unequipped;
+}
+
+void AMainCharacter::PlayMontage(UAnimMontage* montage, FName sectionName, bool bOverride)
+{
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance)
+	{
+		AnimInstance->Montage_Play(montage,1.0f, EMontagePlayReturnType::MontageLength,0.0f, bOverride);
+		if (!sectionName.IsNone())
+		{
+			AnimInstance->Montage_JumpToSection(sectionName, montage);
+		}
+	}
+}
+void AMainCharacter::AttackEnd()
+{
+	ActionState = EActionState::EAS_Unoccupied;
+}
+
 void AMainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
@@ -120,6 +167,7 @@ void AMainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 		EIC->BindAction(LookAction, ETriggerEvent::Triggered, this, &AMainCharacter::Look);
 		EIC->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ACharacter::Jump);
 		EIC->BindAction(EquipAction, ETriggerEvent::Triggered, this, &AMainCharacter::Equip);
+		EIC->BindAction(AttackAction, ETriggerEvent::Triggered, this, &AMainCharacter::Attack);
 	}
 
 }

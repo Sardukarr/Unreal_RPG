@@ -10,7 +10,9 @@ void AWeapon::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* 
 	if (Player)
 	{
 		FAttachmentTransformRules TransformRules(EAttachmentRule::SnapToTarget, true);
-		ItemMesh->AttachToComponent(Player->GetMesh(), TransformRules, FName("RightHandSocket"));
+		//ItemMesh->AttachToComponent(Player->GetMesh(), TransformRules, FName("RightHandSocket"));
+		Player->SetOverlappingItem(this);
+
 	}
 }
 
@@ -23,4 +25,5 @@ void AWeapon::Equip(USceneComponent* InParent, FName InSocketName)
 {
 	FAttachmentTransformRules TransformRules(EAttachmentRule::SnapToTarget, true);
 	ItemMesh->AttachToComponent(InParent, TransformRules, InSocketName);
+	ItemState = EItemState::EIS_Equipped;
 }
