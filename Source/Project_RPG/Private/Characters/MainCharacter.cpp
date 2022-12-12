@@ -6,6 +6,7 @@
 
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Components/BoxComponent.h"
 
 #include "GroomComponent.h"
 #include "Camera/CameraComponent.h"
@@ -63,7 +64,8 @@ void AMainCharacter::Tick(float DeltaTime)
 
 void AMainCharacter::Move(const FInputActionValue& Value)
 {
-	if (ActionState == EActionState::EAS_Attacking) return;
+	if (ActionState != EActionState::EAS_Unoccupied) return;
+	
 	FVector2D moveValue = Value.Get<FVector2D>();
 
 	if (Controller)
@@ -109,6 +111,30 @@ void AMainCharacter::Equip()
 	{
 		Weapon->Equip(GetMesh(), FName("RightHandSocket"));
 		CharacterState = ECharacterState::ECS_EquippedOneHandedWeapon;
+		EquippedWeapon = Weapon;
+		OverlappingItem = nullptr;
+
+	}
+	else
+	{
+		if (ActionState == EActionState::EAS_Unoccupied &&
+			CharacterState != ECharacterState::ECS_Unequipped)
+		{
+
+			PlayMontage(EquipMontage, FName("Unequip"));
+			CharacterState = ECharacterState::ECS_Unequipped;
+			ActionState = EActionState::EAS_EquippingWeapon;
+
+		}
+		else if (ActionState == EActionState::EAS_Unoccupied &&
+			CharacterState == ECharacterState::ECS_Unequipped && EquippedWeapon)
+		{
+			PlayMontage(EquipMontage, FName("Equip"));
+			CharacterState = ECharacterState::ECS_EquippedOneHandedWeapon;
+			ActionState = EActionState::EAS_EquippingWeapon;
+		}
+
+
 	}
 }
 void AMainCharacter::Attack()
@@ -116,7 +142,7 @@ void AMainCharacter::Attack()
 	if (CanAttack())
 	{
 	FName SectionName = FName();
-	int32 Selection = FMath::RandRange(0, 1);
+	int32 Selection = FMath::RandRange(0, 4);
 
 	switch (Selection)
 		{
@@ -126,12 +152,27 @@ void AMainCharacter::Attack()
 		case 1:
 			SectionName = FName("Attack2");
 			break;
+		case 2:
+			SectionName = FName("Attack3");
+			break;
+		case 3:
+			SectionName = FName("Attack4");
+			break;
 		default:
+			SectionName = FName("Attack5");
 			break;
 		}
 
 		PlayMontage(AttackMontage, SectionName);
 		ActionState = EActionState::EAS_Attacking;
+	}
+}
+
+void AMainCharacter::SetWeaponCollisionEnabled(ECollisionEnabled::Type CollisionEnabled)
+{
+	if (EquippedWeapon && EquippedWeapon->GetWeaponBox())
+	{
+		EquippedWeapon->GetWeaponBox()->SetCollisionEnabled(CollisionEnabled);
 	}
 }
 
@@ -143,7 +184,7 @@ bool AMainCharacter::CanAttack()
 void AMainCharacter::PlayMontage(UAnimMontage* montage, FName sectionName, bool bOverride)
 {
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-	if (AnimInstance)
+	if (AnimInstance && montage)
 	{
 		AnimInstance->Montage_Play(montage,1.0f, EMontagePlayReturnType::MontageLength,0.0f, bOverride);
 		if (!sectionName.IsNone())
@@ -153,6 +194,26 @@ void AMainCharacter::PlayMontage(UAnimMontage* montage, FName sectionName, bool 
 	}
 }
 void AMainCharacter::AttackEnd()
+{
+	ActionState = EActionState::EAS_Unoccupied;
+}
+
+void AMainCharacter::Disarm()
+{
+	if (EquippedWeapon)
+	{
+		EquippedWeapon->AttachToSocket(GetMesh(), FName("SwordScabbard"));
+	}
+}
+void AMainCharacter::Arm()
+{
+	if (EquippedWeapon)
+	{
+		EquippedWeapon->AttachToSocket(GetMesh(), FName("RightHandSocket"));
+	}
+}
+
+void AMainCharacter::ResetCharacterState()
 {
 	ActionState = EActionState::EAS_Unoccupied;
 }

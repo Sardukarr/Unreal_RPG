@@ -15,6 +15,7 @@ class UCameraComponent;
 class UGroomComponent;
 class UAnimMontage;
 class AItem;
+class AWeapon;
 
 class UInputMappingContext;
 class UInputAction;
@@ -32,6 +33,8 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 
+	UFUNCTION(BlueprintCallable)
+	void SetWeaponCollisionEnabled(ECollisionEnabled::Type CollisionEnabled);
 
 protected:
 
@@ -44,6 +47,7 @@ protected:
 	void Look(const FInputActionValue& Value);
 	void Equip();
 	void Attack();
+
 
 	/**
 	* Enhanced input action mapping
@@ -65,9 +69,15 @@ protected:
 	/**
 	* Animations
 	*/
-	void PlayMontage(UAnimMontage* montage, FName sectionName = FName(NAME_None), bool bOverride = false);
+	void PlayMontage(UAnimMontage* montage, FName sectionName = FName(NAME_None), bool bOverride = true);
 	UFUNCTION(BlueprintCallable)
 	void AttackEnd();
+	UFUNCTION(BlueprintCallable)
+	void Disarm();
+	UFUNCTION(BlueprintCallable)
+	void Arm();
+	UFUNCTION(BlueprintCallable)
+	void ResetCharacterState();
 
 private:
 	bool CanAttack();
@@ -86,11 +96,18 @@ private:
 	UPROPERTY(VisibleInstanceOnly)
 	AItem* OverlappingItem;
 
+	UPROPERTY(VisibleAnywhere, Category = Weapon)
+	AWeapon* EquippedWeapon;
+
 	UPROPERTY(EditDefaultsOnly, Category = Animations)
 	UAnimMontage* AttackMontage;
 
+	UPROPERTY(EditDefaultsOnly, Category = Animations)
+	UAnimMontage* EquipMontage;
+
+	UPROPERTY(VisibleInstanceOnly)
 	ECharacterState CharacterState = ECharacterState::ECS_Unequipped;
-	UPROPERTY(BlueprintReadWrite, meta=(AllowPrivateAccess="true"))
+	UPROPERTY(VisibleInstanceOnly,BlueprintReadWrite, meta=(AllowPrivateAccess="true"))
 	EActionState ActionState = EActionState::EAS_Unoccupied;
 
 public:
