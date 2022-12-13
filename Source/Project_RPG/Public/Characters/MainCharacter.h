@@ -69,7 +69,7 @@ protected:
 	/**
 	* Animations
 	*/
-	void PlayMontage(UAnimMontage* montage, FName sectionName = FName(NAME_None), bool bOverride = true);
+	void PlayMontage(UAnimMontage* montage, const FName& sectionName = FName(NAME_None), bool bOverride = true);
 	UFUNCTION(BlueprintCallable)
 	void AttackEnd();
 	UFUNCTION(BlueprintCallable)
@@ -80,6 +80,10 @@ protected:
 	void ResetCharacterState();
 
 private:
+
+	/**
+	* Components
+	*/
 	bool CanAttack();
 	UPROPERTY(VisibleAnywhere)
 	USpringArmComponent* CameraBoom;
@@ -93,17 +97,27 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = Hair)
 	UGroomComponent* Eyebrows;
 
+	/**
+	* items
+	*/
 	UPROPERTY(VisibleInstanceOnly)
 	AItem* OverlappingItem;
 
 	UPROPERTY(VisibleAnywhere, Category = Weapon)
 	AWeapon* EquippedWeapon;
 
+	/**
+	* AnimationsMontages
+	*/
+
 	UPROPERTY(EditDefaultsOnly, Category = Animations)
 	UAnimMontage* AttackMontage;
 
 	UPROPERTY(EditDefaultsOnly, Category = Animations)
 	UAnimMontage* EquipMontage;
+	
+
+
 
 	UPROPERTY(VisibleInstanceOnly)
 	ECharacterState CharacterState = ECharacterState::ECS_Unequipped;

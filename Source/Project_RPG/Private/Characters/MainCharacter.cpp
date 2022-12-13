@@ -2,14 +2,14 @@
 
 
 #include "Characters/MainCharacter.h"
-#include "Components/InputComponent.h"
 
+#include "Components/InputComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Components/BoxComponent.h"
-
 #include "GroomComponent.h"
 #include "Camera/CameraComponent.h"
+
 #include "Items/Weapons/Weapon.h"
 
 #include "EnhancedInputSubsystems.h"
@@ -173,6 +173,7 @@ void AMainCharacter::SetWeaponCollisionEnabled(ECollisionEnabled::Type Collision
 	if (EquippedWeapon && EquippedWeapon->GetWeaponBox())
 	{
 		EquippedWeapon->GetWeaponBox()->SetCollisionEnabled(CollisionEnabled);
+		EquippedWeapon->IgnoreActors.Empty();
 	}
 }
 
@@ -181,7 +182,7 @@ bool AMainCharacter::CanAttack()
 	return AttackMontage && ActionState == EActionState::EAS_Unoccupied && CharacterState!=ECharacterState::ECS_Unequipped;
 }
 
-void AMainCharacter::PlayMontage(UAnimMontage* montage, FName sectionName, bool bOverride)
+void AMainCharacter::PlayMontage(UAnimMontage* montage, const FName& sectionName, bool bOverride)
 {
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 	if (AnimInstance && montage)
