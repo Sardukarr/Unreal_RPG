@@ -22,6 +22,9 @@ public:
 	void Equip(USceneComponent* InParent, FName InSocketName);
 	void AttachToSocket(USceneComponent* InParent, const FName& InSocketName);
 
+	UFUNCTION(BlueprintImplementableEvent)
+	void CreateForceFields(const FVector& FieldLocation);
+
 	TArray<AActor*> IgnoreActors;
 
 protected:
