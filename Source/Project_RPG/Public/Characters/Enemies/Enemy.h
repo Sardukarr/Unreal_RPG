@@ -8,6 +8,7 @@
 #include "Enemy.generated.h"
 
 class UAnimMontage;
+class UAttributeComponent;
 UCLASS()
 class PROJECT_RPG_API AEnemy : public ACharacter, public IHitInterface
 {
@@ -42,6 +43,10 @@ protected:
 
 
 	virtual void BeginPlay() override;
+private:
+
+	UPROPERTY(VisibleAnywhere)
+		UAttributeComponent* Attributes;
 
 public:	
 

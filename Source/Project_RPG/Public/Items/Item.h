@@ -7,6 +7,7 @@
 #include "Item.generated.h"
 
 class USphereComponent;
+class UNiagaraComponent;
 
 enum class EItemState : uint8
 {
@@ -49,6 +50,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere)
 	USphereComponent* Sphere;
+
+	UPROPERTY(EditAnywhere)
+	UNiagaraComponent* SparksEffect;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)// meta = (AllowPrivateAccess = "true"))
 	float RunningTime;

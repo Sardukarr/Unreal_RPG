@@ -2,9 +2,13 @@
 
 
 #include "Characters/Enemies/Enemy.h"
+
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "Components/AttributeComponent.h"
+
 #include "Project_RPG/DebugMacros.h"
+
 #include "Kismet/KismetSystemLibrary.h"
 #include "Kismet/GameplayStatics.h"
 

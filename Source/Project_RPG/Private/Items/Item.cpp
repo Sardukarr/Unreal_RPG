@@ -5,23 +5,29 @@
 #include "Project_RPG/DebugMacros.h"
 #include "Components/SphereComponent.h"
 #include "Characters/MainCharacter.h"
+#include "NiagaraComponent.h"
+
 AItem::AItem()
 {
 
 	PrimaryActorTick.bCanEverTick = true;
 	ItemMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ItemMeshComponent"));
 	RootComponent = ItemMesh;
-	ItemMesh->SetSimulatePhysics(true);
+	
 	ItemMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);
 
 	Sphere = CreateDefaultSubobject<USphereComponent>(TEXT("Sphere"));
 	Sphere->SetupAttachment(GetRootComponent());
+
+	SparksEffect = CreateDefaultSubobject<UNiagaraComponent>(TEXT("Embers"));
+	SparksEffect->SetupAttachment(GetRootComponent());
+
 }
 
 void AItem::BeginPlay()
 {
 	Super::BeginPlay();
-
+	ItemMesh->SetSimulatePhysics(true);
 
 
 	if(GEngine)

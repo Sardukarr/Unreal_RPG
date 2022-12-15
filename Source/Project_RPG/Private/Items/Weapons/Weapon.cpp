@@ -7,6 +7,7 @@
 #include "Components/SphereComponent.h"
 #include "Components/BoxComponent.h"
 #include "Interfaces/HitInterface.h"
+#include "NiagaraComponent.h"
 
 AWeapon::AWeapon()
 {
@@ -88,7 +89,7 @@ void AWeapon::OnSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, AActo
 
 void AWeapon::Equip(USceneComponent* InParent, FName InSocketName)
 {
-	ItemMesh->SetSimulatePhysics(true);
+	ItemMesh->SetSimulatePhysics(false);
 	AttachToSocket(InParent, InSocketName);
 	ItemState = EItemState::EIS_Equipped;
 	if (EquipSound)
@@ -103,7 +104,10 @@ void AWeapon::Equip(USceneComponent* InParent, FName InSocketName)
 	{
 		Sphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	}
-
+	if (SparksEffect)
+	{
+		SparksEffect->Deactivate();
+	}
 }
 
 void AWeapon::AttachToSocket(USceneComponent* InParent, const FName& InSocketName)
