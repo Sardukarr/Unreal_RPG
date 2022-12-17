@@ -35,6 +35,7 @@ void AWeapon::OnBoxOverlap(UPrimitiveComponent* OverlappedComponent, AActor* Oth
 {
 	TArray<AActor*> ActorsToIgnore;
 	ActorsToIgnore.Add(this);
+	ActorsToIgnore.Add(GetOwner());
 	for (AActor* Actor : IgnoreActors)
 	{
 		ActorsToIgnore.AddUnique(Actor);
@@ -57,6 +58,14 @@ void AWeapon::OnBoxOverlap(UPrimitiveComponent* OverlappedComponent, AActor* Oth
 	);
 	if(BoxHit.GetActor())
 	{
+		UGameplayStatics::ApplyDamage(
+			BoxHit.GetActor(),
+			Damage,
+			GetInstigator()->GetController(),
+			this,
+			UDamageType::StaticClass()
+		);
+
 		IHitInterface* HitInterface = Cast<IHitInterface>(BoxHit.GetActor());
 		if (HitInterface)
 		{
@@ -65,6 +74,7 @@ void AWeapon::OnBoxOverlap(UPrimitiveComponent* OverlappedComponent, AActor* Oth
 		IgnoreActors.AddUnique(BoxHit.GetActor());
 
 		CreateForceFields(BoxHit.ImpactPoint);
+	
 	}
 }
 
@@ -87,11 +97,14 @@ void AWeapon::OnSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, AActo
 	Super::OnSphereEndOverlap(OverlappedComponent, OtherActor, OtherComp, OtherBodyIndex);
 }
 
-void AWeapon::Equip(USceneComponent* InParent, FName InSocketName)
+void AWeapon::Equip(USceneComponent* InParent, FName InSocketName, AActor* NewOwner, APawn* NewInstigator)
 {
 	ItemMesh->SetSimulatePhysics(false);
 	AttachToSocket(InParent, InSocketName);
 	ItemState = EItemState::EIS_Equipped;
+	SetOwner(NewOwner);
+	SetInstigator(NewInstigator);
+
 	if (EquipSound)
 	{
 		UGameplayStatics::PlaySoundAtLocation(

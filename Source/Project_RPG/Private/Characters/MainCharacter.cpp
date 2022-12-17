@@ -25,6 +25,8 @@ AMainCharacter::AMainCharacter()
 	bUseControllerRotationRoll = false;
 	bUseControllerRotationYaw = false;
 
+	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
+
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(GetRootComponent());
 	CameraBoom->TargetArmLength = 300.f;
@@ -41,6 +43,9 @@ AMainCharacter::AMainCharacter()
 	Eyebrows->AttachmentName = FString("head");
 
 	AutoPossessPlayer = EAutoReceiveInput::Player0;
+	//DeathMontageSections.Add(FName("Death1"));
+	AttackMontageSections.Add(FName("Attack1"));
+	AttackMontageSections.Add(FName("Attack2"));
 }
 
 void AMainCharacter::BeginPlay()
@@ -109,7 +114,8 @@ void AMainCharacter::Equip()
 {
 	if(AWeapon* Weapon = Cast<AWeapon>(OverlappingItem))
 	{
-		Weapon->Equip(GetMesh(), FName("RightHandSocket"));
+		Weapon->Equip(GetMesh(), FName("RightHandSocket"), this, this);
+
 		CharacterState = ECharacterState::ECS_EquippedOneHandedWeapon;
 		EquippedWeapon = Weapon;
 		OverlappingItem = nullptr;
@@ -141,27 +147,11 @@ void AMainCharacter::Attack()
 {
 	if (CanAttack())
 	{
-	FName SectionName = FName();
-	int32 Selection = FMath::RandRange(0, 4);
-
-	switch (Selection)
-		{
-		case 0:
-			SectionName = FName("Attack1");
-			break;
-		case 1:
-			SectionName = FName("Attack2");
-			break;
-		case 2:
-			SectionName = FName("Attack3");
-			break;
-		case 3:
-			SectionName = FName("Attack4");
-			break;
-		default:
-			SectionName = FName("Attack5");
-			break;
-		}
+	int32 Selection = FMath::RandRange(0, AttackMontageSections.Num()-1);
+	FName SectionName = AttackMontageSections[Selection];
+	
+	//FName SectionName = FName(FString("Attack" + FString::FromInt(Selection)));
+	
 
 		PlayMontage(AttackMontage, SectionName);
 		ActionState = EActionState::EAS_Attacking;

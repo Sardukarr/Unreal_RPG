@@ -7,6 +7,9 @@
 #include "Components/CapsuleComponent.h"
 #include "Components/AttributeComponent.h"
 
+#include "GameFramework/CharacterMovementComponent.h"
+#include "HUD/HealthBar.h"
+
 #include "Project_RPG/DebugMacros.h"
 
 #include "Kismet/KismetSystemLibrary.h"
@@ -21,17 +24,44 @@ AEnemy::AEnemy()
 	GetMesh()->SetGenerateOverlapEvents(true);
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
 
+	Attributes = CreateDefaultSubobject<UAttributeComponent>(TEXT("Attributes"));
+	HealthBarWidget = CreateDefaultSubobject<UHealthBar>(TEXT("HealthBar"));
+	HealthBarWidget->SetupAttachment(GetRootComponent());
+	
+	DeathMontageSections.Add(FName("Death1"));
+
+	GetCharacterMovement()->bOrientRotationToMovement = true;
+	bUseControllerRotationPitch = false;
+	bUseControllerRotationYaw = false;
+	bUseControllerRotationRoll = false;
+	
 }
 
 void AEnemy::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	if (HealthBarWidget)
+	{
+		HealthBarWidget->SetVisibility(false);
+	}
 }
 
 void AEnemy::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	if (CombatTarget)
+	{
+		const double DistanceToTarget = (CombatTarget->GetActorLocation() - GetActorLocation()).Size();
+		if (DistanceToTarget > CombatRadius)
+		{
+			CombatTarget = nullptr;
+			if (HealthBarWidget)
+			{
+				HealthBarWidget->SetVisibility(false);
+			}
+		}
+	}
 
 }
 
@@ -45,8 +75,22 @@ void AEnemy::GetHit_Implementation(const FVector& ImpactPoint)
 {
 	//DRAW_SPHERE_COLOR(ImpactPoint, FColor::Orange);
 	
+	if (HealthBarWidget)
+	{
+		HealthBarWidget->SetVisibility(true);
+	}
 
-	DirectionalHit(ImpactPoint);
+
+	if (Attributes && Attributes->IsAlive())
+	{
+		DirectionalHit(ImpactPoint);
+	}
+	else
+	{
+		Die();
+	}
+
+
 
 	if (HitSound)
 	{
@@ -64,6 +108,7 @@ void AEnemy::GetHit_Implementation(const FVector& ImpactPoint)
 			ImpactPoint
 		);
 	}
+
 }
 
 void AEnemy::DirectionalHit(const FVector& ImpactPoint)
@@ -123,4 +168,37 @@ void AEnemy::PlayMontage(UAnimMontage* montage, const FName& sectionName, bool b
 			AnimInstance->Montage_JumpToSection(sectionName, montage);
 		}
 	}
+}
+
+float AEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	if (Attributes && HealthBarWidget)
+	{
+		Attributes->ReceiveDamage(DamageAmount);
+		HealthBarWidget->SetHealthPercent(Attributes->GetHealthPercent());
+	}
+	return DamageAmount;
+
+	CombatTarget = EventInstigator->GetPawn();
+}
+
+void AEnemy::Die()
+{
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance && DeathMontage)
+	{
+		int32 Selection = FMath::RandRange(0, DeathMontageSections.Num() - 1);
+		FName SectionName = DeathMontageSections[Selection];
+
+		PlayMontage(DeathMontage, SectionName);
+	}
+	State = EEnemyState::EES_Dead;
+
+	if (HealthBarWidget)
+	{
+		HealthBarWidget->SetVisibility(false);
+	}
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	SetLifeSpan(120.f);
 }

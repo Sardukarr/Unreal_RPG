@@ -115,12 +115,15 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, Category = Animations)
 	UAnimMontage* EquipMontage;
-	
+	UPROPERTY(EditDefaultsOnly, Category = Animations)
+	TArray<FName> AttackMontageSections;
 
-
-
+	/**
+	* States
+	*/
 	UPROPERTY(VisibleInstanceOnly)
 	ECharacterState CharacterState = ECharacterState::ECS_Unequipped;
+
 	UPROPERTY(VisibleInstanceOnly,BlueprintReadWrite, meta=(AllowPrivateAccess="true"))
 	EActionState ActionState = EActionState::EAS_Unoccupied;
 
