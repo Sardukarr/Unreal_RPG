@@ -9,25 +9,31 @@
 
 AItem::AItem()
 {
-
 	PrimaryActorTick.bCanEverTick = true;
 	ItemMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ItemMeshComponent"));
-	RootComponent = ItemMesh;
+	
+	ItemSkeletalMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("ItemSkeletalMeshComponent"));
+	
+	Sphere = CreateDefaultSubobject<USphereComponent>(TEXT("Sphere"));
+	
+	SparksEffect = CreateDefaultSubobject<UNiagaraComponent>(TEXT("Embers"));
 	
 	ItemMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);
+	ItemSkeletalMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);
+	
+	RootComponent = ItemMesh;
 
-	Sphere = CreateDefaultSubobject<USphereComponent>(TEXT("Sphere"));
-	Sphere->SetupAttachment(GetRootComponent());
-
-	SparksEffect = CreateDefaultSubobject<UNiagaraComponent>(TEXT("Embers"));
+	ItemSkeletalMesh->SetupAttachment(GetRootComponent());
+	
 	SparksEffect->SetupAttachment(GetRootComponent());
-
+	Sphere->SetupAttachment(GetRootComponent());
 }
 
 void AItem::BeginPlay()
 {
 	Super::BeginPlay();
 	ItemMesh->SetSimulatePhysics(true);
+	GetItemMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);
 
 
 	if(GEngine)
@@ -52,6 +58,18 @@ float AItem::TransformedSin()
 float AItem::TransformedCos()
 {
 	return Amplitude * FMath::Cos(RunningTime * TimeConstant);
+}
+
+UPrimitiveComponent* AItem::GetItemMesh()
+{
+	if (bIsMeshSkeletal)
+	{
+		return ItemSkeletalMesh;
+	}
+	else
+	{
+		return ItemMesh;
+	}
 }
 
 template<typename T>

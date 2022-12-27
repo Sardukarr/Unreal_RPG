@@ -11,6 +11,10 @@
 class UAnimMontage;
 class UAttributeComponent;
 class UHealthBar;
+class AAIController;
+class UPawnSensingComponent;
+
+
 UCLASS()
 class PROJECT_RPG_API AEnemy : public ACharacter, public IHitInterface
 {
@@ -42,6 +46,59 @@ public:
 	UPROPERTY(EditAnywhere)
 	double CombatRadius = 500.f;
 
+	/**
+	* AI
+	*/
+
+	UPROPERTY(EditAnywhere)
+	AAIController* EnemyController;
+
+	UPROPERTY(VisibleAnywhere)
+	UPawnSensingComponent* PawnSensing;
+
+	UFUNCTION()
+	void PawnSeen(APawn* SeenPawn);
+
+	/**
+	* Navigation
+	*/
+
+	// Current patrol target
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "AI Navigation")
+	AActor* PatrolTarget;
+
+	UPROPERTY(EditInstanceOnly,BlueprintReadWrite, Category = "AI Navigation")
+	TArray<AActor*> PatrolTargets;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI Navigation")
+	double PatrolRadius = 200.f;
+
+	FTimerHandle PatrolTimer;
+
+	void PatrolTimerFinished();
+
+	void CheckPatrolTarget();
+
+	void CheckCombatTarget();
+
+
+	UPROPERTY(EditAnywhere, Category = "AI Navigation")
+	float WaitMin = 5.f;
+
+	UPROPERTY(EditAnywhere, Category = "AI Navigation")
+	float WaitMax = 10.f;
+
+
+	UFUNCTION(BlueprintCallable, Category = "AI Navigation")
+	void MoveToTarget(AActor* Target, float AcceptanceRadious=50.f);
+
+	UFUNCTION(BlueprintCallable, Category = "AI Navigation")
+	AActor* ChooseRandomPatrolTarget();
+
+	UFUNCTION(BlueprintCallable, Category = "AI Navigation")
+	AActor* ChooseNextPatrolTarget();
+
+
 protected:
 
 	UPROPERTY(VisibleAnywhere)
@@ -66,17 +123,15 @@ protected:
 
 	virtual void BeginPlay() override;
 
-
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	EEnemyState State = EEnemyState::EES_Idle;
-private:
+//private:
 
 	UPROPERTY(VisibleAnywhere)
 	UAttributeComponent* Attributes;
 
 	void Die();
-
+	bool InTargetRange(AActor* Target, double Radius);
 
 public:	
 

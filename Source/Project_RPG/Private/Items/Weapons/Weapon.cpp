@@ -4,10 +4,8 @@
 #include "Items/Weapons/Weapon.h"
 #include "Characters/MainCharacter.h"
 #include "Kismet/GameplayStatics.h"
-#include "Components/SphereComponent.h"
 #include "Components/BoxComponent.h"
 #include "Interfaces/HitInterface.h"
-#include "NiagaraComponent.h"
 
 AWeapon::AWeapon()
 {
@@ -22,7 +20,11 @@ AWeapon::AWeapon()
 
 	BoxTraceEnd = CreateDefaultSubobject<USceneComponent>(TEXT("Box Trace End"));
 	BoxTraceEnd->SetupAttachment(GetRootComponent());
+
+	MainSocketName = FName("RightHandSocket");
+	ScabbardSocketName  = FName("SwordScabbard");
 }
+
 
 void AWeapon::BeginPlay()
 {
@@ -97,34 +99,24 @@ void AWeapon::OnSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, AActo
 	Super::OnSphereEndOverlap(OverlappedComponent, OtherActor, OtherComp, OtherBodyIndex);
 }
 
-void AWeapon::Equip(USceneComponent* InParent, FName InSocketName, AActor* NewOwner, APawn* NewInstigator)
+void AWeapon::OnEquip(USceneComponent* InParent)
 {
-	ItemMesh->SetSimulatePhysics(false);
-	AttachToSocket(InParent, InSocketName);
-	ItemState = EItemState::EIS_Equipped;
-	SetOwner(NewOwner);
-	SetInstigator(NewInstigator);
+	Super::OnEquip(InParent);
+}
 
-	if (EquipSound)
-	{
-		UGameplayStatics::PlaySoundAtLocation(
-			this,
-			EquipSound,
-			GetActorLocation()
-		);
-	}
-	if (Sphere)
-	{
-		Sphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	}
-	if (SparksEffect)
-	{
-		SparksEffect->Deactivate();
-	}
+void AWeapon::OnPickup(USceneComponent* InParent, AActor* NewOwner, APawn* NewInstigator)
+{
+	Super::OnPickup(InParent, NewOwner, NewInstigator);
+	OnEquip(InParent);
 }
 
 void AWeapon::AttachToSocket(USceneComponent* InParent, const FName& InSocketName)
 {
-	FAttachmentTransformRules TransformRules(EAttachmentRule::SnapToTarget, true);
-	ItemMesh->AttachToComponent(InParent, TransformRules, InSocketName);
+	Super::AttachToSocket(InParent, InSocketName);
+}
+
+void AWeapon::OnUnequip(USceneComponent* InParent)
+{
+	Super::OnUnequip(InParent);
+	AttachToSocket(InParent, ScabbardSocketName);
 }

@@ -114,7 +114,7 @@ void AMainCharacter::Equip()
 {
 	if(AWeapon* Weapon = Cast<AWeapon>(OverlappingItem))
 	{
-		Weapon->Equip(GetMesh(), FName("RightHandSocket"), this, this);
+		Weapon->OnPickup(GetMesh(), this, this);
 
 		CharacterState = ECharacterState::ECS_EquippedOneHandedWeapon;
 		EquippedWeapon = Weapon;
@@ -193,14 +193,14 @@ void AMainCharacter::Disarm()
 {
 	if (EquippedWeapon)
 	{
-		EquippedWeapon->AttachToSocket(GetMesh(), FName("SwordScabbard"));
+		EquippedWeapon->OnUnequip(GetMesh());
 	}
 }
 void AMainCharacter::Arm()
 {
 	if (EquippedWeapon)
 	{
-		EquippedWeapon->AttachToSocket(GetMesh(), FName("RightHandSocket"));
+		EquippedWeapon->OnEquip(GetMesh());
 	}
 }
 

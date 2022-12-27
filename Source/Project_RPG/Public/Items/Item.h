@@ -8,11 +8,14 @@
 
 class USphereComponent;
 class UNiagaraComponent;
+class UCapsuleComponent;
 
 enum class EItemState : uint8
 {
 	EIS_Hovering,
-	EIS_Equipped
+	EIS_Equipped,
+	EIS_Unequiped,
+	EIS_InInventory
 };
 
 UCLASS()
@@ -23,6 +26,8 @@ class PROJECT_RPG_API AItem : public AActor
 public:	
 	AItem();
 	virtual void Tick(float DeltaTime) override;
+
+
 
 protected:
 	virtual void BeginPlay() override;
@@ -37,6 +42,9 @@ protected:
 	UFUNCTION(BlueprintPure)
 	float TransformedCos();
 
+	UFUNCTION(BlueprintPure)
+	UPrimitiveComponent* GetItemMesh();
+
 	template<typename T>
 	T Avg(T First, T Second);
 
@@ -49,6 +57,9 @@ protected:
 	UStaticMeshComponent* ItemMesh;
 
 	UPROPERTY(VisibleAnywhere)
+	USkeletalMeshComponent* ItemSkeletalMesh;
+
+	UPROPERTY(VisibleAnywhere)
 	USphereComponent* Sphere;
 
 	UPROPERTY(EditAnywhere)
@@ -57,6 +68,8 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)// meta = (AllowPrivateAccess = "true"))
 	float RunningTime;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	bool bIsMeshSkeletal=false;
 
 	EItemState ItemState = EItemState::EIS_Hovering;
 

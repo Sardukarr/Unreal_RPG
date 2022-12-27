@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Items/Item.h"
+#include "Items/BaseEquipable.h"
 #include "Weapon.generated.h"
 
 /**
@@ -13,14 +13,21 @@ class UBoxComponent;
 class USoundBase;
 
 UCLASS()
-class PROJECT_RPG_API AWeapon : public AItem
+class PROJECT_RPG_API AWeapon : public ABaseEquipable
 {
 	GENERATED_BODY()
 
 public:
 	AWeapon();
-	void Equip(USceneComponent* InParent, FName InSocketName, AActor* NewOwner, APawn* NewInstigator);
-	void AttachToSocket(USceneComponent* InParent, const FName& InSocketName);
+
+	virtual void OnEquip(USceneComponent* InParent) override;
+
+	virtual void OnPickup(USceneComponent* InParent, AActor* NewOwner, APawn* NewInstigator) override;
+
+	virtual void AttachToSocket(USceneComponent* InParent, const FName& InSocketName) override;
+
+	virtual void OnUnequip(USceneComponent* InParent) override;
+
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void CreateForceFields(const FVector& FieldLocation);
@@ -39,10 +46,12 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, Category = "Weapon Properties")
 	UBoxComponent* WeaponBox;
-private:
-	UPROPERTY(EditAnywhere, Category = "Weapon Properties")
-	USoundBase* EquipSound;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	FName ScabbardSocketName;
+	
+
+//private:
 	UPROPERTY(VisibleAnywhere)
 	USceneComponent* BoxTraceStart;
 
