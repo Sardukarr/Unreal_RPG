@@ -14,6 +14,7 @@
 
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
+#include "GameplayTagsManager.h"
 
 AMainCharacter::AMainCharacter()
 {
@@ -52,6 +53,9 @@ void AMainCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	Tags.Add(FName("PlayerCharacter"));
+	//GameplayTags = UGameplayTagsManager::Get().RequestGameplayTag("Character.Player");
+
 	if (APlayerController* PC = Cast< APlayerController>(GetController()))
 	{
 		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem< UEnhancedInputLocalPlayerSubsystem>(PC->GetLocalPlayer()))
@@ -80,9 +84,7 @@ void AMainCharacter::Move(const FInputActionValue& Value)
 			const FRotator YawRotation(0.f, GetControlRotation().Yaw, 0.f);
 			const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
 			AddMovementInput(Direction, moveValue.X);
-			
-			//AddMovementInput(GetActorRightVector(), moveValue.X);
-		//	AddMovementInput(FRotationMatrix(FRotator(0.f, GetControlRotation().Yaw + 90.f, 0.f)).GetUnitAxis(EAxis::Y), moveValue.X);
+
 		}
 		if (moveValue.Y != 0.f)
 		{
@@ -90,12 +92,6 @@ void AMainCharacter::Move(const FInputActionValue& Value)
 			const FRotator YawRotation(0.f, GetControlRotation().Yaw, 0.f);
 			const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 			AddMovementInput(Direction, moveValue.Y);
-
-			//const FVector Direction = FRotationMatrix(FRotator(0.f, GetControlRotation().Yaw, 0.f)).GetUnitAxis(EAxis::Y);
-			//AddMovementInput(FRotationMatrix(FRotator(0.f, GetControlRotation().Yaw, 0.f)).GetUnitAxis(EAxis::Y), moveValue.Y);
-			
-			
-			//AddMovementInput(GetActorForwardVector(), moveValue.Y);
 		}
 	}
 }

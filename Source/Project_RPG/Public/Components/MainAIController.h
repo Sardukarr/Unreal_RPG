@@ -13,6 +13,8 @@
 
 class AEnemy;
 class UBehaviorTree;
+class UAIPerceptionComponent;
+struct FActorPerceptionBlueprintInfo;
 UCLASS()
 class PROJECT_RPG_API AMainAIController : public AAIController
 {
@@ -21,13 +23,25 @@ class PROJECT_RPG_API AMainAIController : public AAIController
 
 public:
 
+	AMainAIController();
+
+	UPROPERTY(EditAnywhere)
+	UAIPerceptionComponent* AIPerception;
+
 	UFUNCTION(BlueprintPure)
 	FORCEINLINE AEnemy* GetEnamy() const { return Enemy; }
+
+
+	UFUNCTION(BlueprintCallable)
+	void PerceptionUpdate(const TArray<AActor*>& UpdatedActors);
+
+	UFUNCTION(BlueprintPure)
+	AActor* FindPlayerInActors(const TArray<AActor*>& UpdatedActors, FActorPerceptionBlueprintInfo& PerceptionInfo, bool& bIsFound);
 
 protected:
 
 	void OnPossess(APawn* InPawn) override;
-
+	virtual void BeginPlay() override;
 
 	AEnemy* Enemy;
 

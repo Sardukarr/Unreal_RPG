@@ -11,9 +11,10 @@
 class UAnimMontage;
 class UAttributeComponent;
 class UHealthBar;
-class AAIController;
-class UPawnSensingComponent;
-
+class AMainAIController;
+class UBlackboardComponent;
+//class UPawnSensingComponent;
+class UAIPerceptionComponent;
 
 UCLASS()
 class PROJECT_RPG_API AEnemy : public ACharacter, public IHitInterface
@@ -39,22 +40,30 @@ public:
 	UPROPERTY(EditAnywhere, Category = VisualEffects)
 	UParticleSystem* HitParticles;
 
+	/**
+	* Combat
+	*/
+
 
 	UPROPERTY()
 	AActor* CombatTarget;
 
+
 	UPROPERTY(EditAnywhere)
 	double CombatRadius = 500.f;
+
+	UPROPERTY(EditAnywhere)
+	double AttackRadius = 150.f;
 
 	/**
 	* AI
 	*/
 
 	UPROPERTY(EditAnywhere)
-	AAIController* EnemyController;
+	AMainAIController* EnemyAIController;
 
-	UPROPERTY(VisibleAnywhere)
-	UPawnSensingComponent* PawnSensing;
+	/*UPROPERTY(VisibleAnywhere)
+	UPawnSensingComponent* PawnSensing;*/
 
 	UFUNCTION()
 	void PawnSeen(APawn* SeenPawn);
@@ -77,9 +86,21 @@ public:
 
 	void PatrolTimerFinished();
 
+	UFUNCTION(BlueprintCallable, Category = "AI Navigation")
 	void CheckPatrolTarget();
 
+	UFUNCTION(BlueprintCallable, Category = "AI Combat")
 	void CheckCombatTarget();
+
+	UFUNCTION(BlueprintCallable, Category = "AI Combat")
+	void Chase();
+
+	UFUNCTION(BlueprintCallable, Category = "AI Combat")
+	void StartAttacking();
+
+	UFUNCTION(BlueprintCallable, Category = "AI Combat")
+	void LoseInterest();
+
 
 
 	UPROPERTY(EditAnywhere, Category = "AI Navigation")
@@ -114,8 +135,15 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = Animations)
 	UAnimMontage* DeathMontage;
+
 	UPROPERTY(EditAnywhere, Category = Animations)
 	TArray<FName> DeathMontageSections;
+
+	UPROPERTY(EditAnywhere, Category = Animations)
+	UAnimMontage* AttackMontage;
+
+	UPROPERTY(EditAnywhere, Category = Animations)
+	TArray<FName> AttackMontageSections;
 
 	void PlayMontage(UAnimMontage* montage,const FName& sectionName = FName(NAME_None), bool bOverride = true);
 
@@ -123,16 +151,23 @@ protected:
 
 	virtual void BeginPlay() override;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	EEnemyState State = EEnemyState::EES_Idle;
 //private:
 
 	UPROPERTY(VisibleAnywhere)
 	UAttributeComponent* Attributes;
+	UPROPERTY(VisibleAnywhere)
+	UBlackboardComponent* Blackboard;
 
+	UFUNCTION(BlueprintNativeEvent)
 	void Die();
+
+	void Die_Implementation();
+
 	bool InTargetRange(AActor* Target, double Radius);
 
 public:	
-
+	FORCEINLINE EEnemyState GetEnemyState() const { return State; }
+	FORCEINLINE UAttributeComponent* GetEnemyAttributes() const { return Attributes; }
 };
