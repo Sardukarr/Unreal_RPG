@@ -28,16 +28,12 @@ AEnemy::AEnemy()
 	GetMesh()->SetGenerateOverlapEvents(true);
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
 
-	Attributes = CreateDefaultSubobject<UAttributeComponent>(TEXT("Attributes"));
 	HealthBarWidget = CreateDefaultSubobject<UHealthBar>(TEXT("HealthBar"));
 	HealthBarWidget->SetupAttachment(GetRootComponent());
 	
 	/*PawnSensing = CreateDefaultSubobject<UPawnSensingComponent>(TEXT("PawnSensing"));
 	PawnSensing->SightRadius = 4000.f;
 	PawnSensing->SetPeripheralVisionAngle(45.f);*/
-
-	
-	DeathMontageSections.Add(FName("Death1"));
 
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 	bUseControllerRotationPitch = false;
@@ -63,7 +59,6 @@ void AEnemy::BeginPlay()
 void AEnemy::MoveToTarget(AActor* Target, float AcceptanceRadious)
 {
 	if (EnemyAIController == nullptr || Target == nullptr) return;
-	//EnemyController = Cast<AAIController>(GetController());
 	FAIMoveRequest MoveRequest;
 	MoveRequest.SetGoalActor(Target);
 	MoveRequest.SetAcceptanceRadius(AcceptanceRadious);
@@ -136,7 +131,7 @@ void AEnemy::CheckCombatTarget()
 	}
 	else if (InTargetRange(CombatTarget, AttackRadius) && State != EEnemyState::EES_Attacking)
 	{
-		StartAttacking();
+		Attack();
 	}
 }
 
@@ -144,32 +139,38 @@ void AEnemy::Chase()
 {
 	// Outside attack range, chase character
 	State = EEnemyState::EES_Chasing;
-	GetCharacterMovement()->MaxWalkSpeed = 300.f;
-	MoveToTarget(CombatTarget);
-	UE_LOG(LogTemp, Warning, TEXT("Chase Player"));
-
+	//GetCharacterMovement()->MaxWalkSpeed = 300.f;
+	//MoveToTarget(CombatTarget);
 }
 
-void AEnemy::StartAttacking()
+float AEnemy::StartAttack()
 {
 	// Inside attack range, attack character
 	State = EEnemyState::EES_Attacking;
-	// TODO: Attack montage
-	UE_LOG(LogTemp, Warning, TEXT("Attack"));
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance && AttackMontage)
+	{
+		int32 Selection = FMath::RandRange(0, AttackMontageSections.Num() - 1);
+		FName SectionName = AttackMontageSections[Selection];
+		return PlayMontage(AttackMontage, SectionName);
+	}
+	return 0.0f;
 }
 
 void AEnemy::LoseInterest()
 {
 	CombatTarget = nullptr;
-	Blackboard->SetValueAsObject(FName("CombatTarget"), nullptr);
+	if(Blackboard)
+	{
+		//Blackboard->SetValueAsObject(FName("CombatTarget"), nullptr);
+	}
 	if (HealthBarWidget)
 	{
 		HealthBarWidget->SetVisibility(false);
 	}
 	State = EEnemyState::EES_Patrolling;
-	GetCharacterMovement()->MaxWalkSpeed = 125.f;
-	MoveToTarget(PatrolTarget);
-	UE_LOG(LogTemp, Warning, TEXT("Lose Interest"));
+	//GetCharacterMovement()->MaxWalkSpeed = 125.f;
+	//MoveToTarget(PatrolTarget);
 }
 
 void AEnemy::CheckPatrolTarget()
@@ -204,24 +205,17 @@ void AEnemy::PawnSeen(APawn* SeenPawn)
 		//GetWorldTimerManager().ClearTimer(PatrolTimer);
 		//GetCharacterMovement()->MaxWalkSpeed = 300.f;
 		CombatTarget = SeenPawn;
-		//UE_LOG(LogTemp, Warning, TEXT("Seen Pawn, now Chasing"));
 		if (Blackboard)
 		{
-			Blackboard->SetValueAsObject(FName("CombatTarget"), SeenPawn);
+	//		Blackboard->SetValueAsObject(FName("CombatTarget"), SeenPawn);
 		}
 		if (State != EEnemyState::EES_Attacking)
 		{
 			State = EEnemyState::EES_Chasing;
 			MoveToTarget(CombatTarget);
-			UE_LOG(LogTemp, Warning, TEXT("Pawn Seen, Chase Player"));
 		}
 	}
 }
-
-
-
-
-
 
 void AEnemy::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
@@ -266,54 +260,6 @@ void AEnemy::GetHit_Implementation(const FVector& ImpactPoint)
 
 }
 
-void AEnemy::DirectionalHit(const FVector& ImpactPoint)
-{
-	// Lower Impact Point to the Enemy's Actor Location Z
-	const FVector ImpactLowered(ImpactPoint.X, ImpactPoint.Y, GetActorLocation().Z);
-	const FVector ToHit = (ImpactLowered - GetActorLocation()).GetSafeNormal();
-
-	// Forward * ToHit = |Forward||ToHit| * cos(theta)
-	// |Forward| = 1, |ToHit| = 1, so Forward * ToHit = cos(theta)
-	const double CosTheta = FVector::DotProduct(GetActorForwardVector(), ToHit);
-	// Take the inverse cosine (arc-cosine) of cos(theta) to get theta
-	double Theta = FMath::RadiansToDegrees(FMath::Acos(CosTheta));
-
-	// if CrossProduct points down, Theta should be negative
-	const FVector CrossProduct = FVector::CrossProduct(GetActorForwardVector(), ToHit);
-	if (CrossProduct.Z < 0)
-	{
-		Theta *= -1.f;
-	}
-
-	FName Section("LargeBack");
-	if (Theta >= -45.f && Theta < 45.f)
-	{
-		Section = FName("LargeFront");
-	}
-	else if (Theta >= -135.f && Theta < -45.f)
-	{
-		Section = FName("LargeLeft");
-	}
-	else if (Theta >= 45.f && Theta < 135.f)
-	{
-		Section = FName("LargeRight");
-	}
-
-	PlayMontage(HitMontage, Section);
-}
-
-void AEnemy::PlayMontage(UAnimMontage* montage, const FName& sectionName, bool bOverride)
-{
-	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-	if (AnimInstance && montage)
-	{
-		AnimInstance->Montage_Play(montage, 1.0f, EMontagePlayReturnType::MontageLength, 0.0f, bOverride);
-		if (!sectionName.IsNone())
-		{
-			AnimInstance->Montage_JumpToSection(sectionName, montage);
-		}
-	}
-}
 
 float AEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
@@ -321,12 +267,9 @@ float AEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AC
 	{
 		Attributes->ReceiveDamage(DamageAmount);
 		HealthBarWidget->SetHealthPercent(Attributes->GetHealthPercent());
-		if (EnemyAIController)
+		if (Blackboard)
 		{
-			if (Blackboard)
-			{
-				Blackboard->SetValueAsObject(FName("CombatTarget"), EventInstigator->GetPawn());
-			}
+	//			Blackboard->SetValueAsObject(FName("CombatTarget"), EventInstigator->GetPawn());
 		}
 	}
 	CombatTarget = EventInstigator->GetPawn();

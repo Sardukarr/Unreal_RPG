@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Character.h"
+#include "BaseCharacter.h"
 #include "CharacterTypes.h"
 #include "MainCharacter.generated.h"
 
@@ -15,13 +15,13 @@ class UCameraComponent;
 class UGroomComponent;
 class UAnimMontage;
 class AItem;
-class AWeapon;
+
 
 class UInputMappingContext;
 class UInputAction;
 struct FInputActionValue;
 UCLASS()
-class PROJECT_RPG_API AMainCharacter : public ACharacter
+class PROJECT_RPG_API AMainCharacter : public ABaseCharacter
 {
 	GENERATED_BODY()
 
@@ -33,9 +33,6 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 
-	UFUNCTION(BlueprintCallable)
-	void SetWeaponCollisionEnabled(ECollisionEnabled::Type CollisionEnabled);
-
 protected:
 
 	virtual void BeginPlay() override;
@@ -46,7 +43,7 @@ protected:
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
 	void Equip();
-	void Attack();
+	virtual void Attack() override;
 
 
 	/**
@@ -69,9 +66,7 @@ protected:
 	/**
 	* Animations
 	*/
-	void PlayMontage(UAnimMontage* montage, const FName& sectionName = FName(NAME_None), bool bOverride = true);
-	UFUNCTION(BlueprintCallable)
-	void AttackEnd();
+		virtual void AttackEnd() override;
 	UFUNCTION(BlueprintCallable)
 	void Disarm();
 	UFUNCTION(BlueprintCallable)
@@ -79,12 +74,12 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	void ResetCharacterState();
 
+	virtual bool CanAttack() override;
 private:
 
 	/**
 	* Components
 	*/
-	bool CanAttack();
 	UPROPERTY(VisibleAnywhere)
 	USpringArmComponent* CameraBoom;
 
@@ -103,20 +98,15 @@ private:
 	UPROPERTY(VisibleInstanceOnly)
 	AItem* OverlappingItem;
 
-	UPROPERTY(VisibleAnywhere, Category = Weapon)
-	AWeapon* EquippedWeapon;
 
 	/**
 	* AnimationsMontages
 	*/
 
-	UPROPERTY(EditDefaultsOnly, Category = Animations)
-	UAnimMontage* AttackMontage;
 
 	UPROPERTY(EditDefaultsOnly, Category = Animations)
 	UAnimMontage* EquipMontage;
-	UPROPERTY(EditDefaultsOnly, Category = Animations)
-	TArray<FName> AttackMontageSections;
+
 
 	/**
 	* States

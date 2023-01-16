@@ -3,13 +3,10 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Character.h"
-#include "Interfaces/HitInterface.h"
+#include "Characters/BaseCharacter.h"
 #include "Characters/CharacterTypes.h"
 #include "Enemy.generated.h"
 
-class UAnimMontage;
-class UAttributeComponent;
 class UHealthBar;
 class AMainAIController;
 class UBlackboardComponent;
@@ -17,7 +14,7 @@ class UBlackboardComponent;
 class UAIPerceptionComponent;
 
 UCLASS()
-class PROJECT_RPG_API AEnemy : public ACharacter, public IHitInterface
+class PROJECT_RPG_API AEnemy : public ABaseCharacter
 {
 	GENERATED_BODY()
 
@@ -30,29 +27,23 @@ public:
 
 	virtual void GetHit_Implementation(const FVector& ImpactPoint) override;
 
-	void DirectionalHit(const FVector& ImpactPoint);
 
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 
-	UPROPERTY(EditAnywhere, Category = Sounds)
-	USoundBase* HitSound;
-
-	UPROPERTY(EditAnywhere, Category = VisualEffects)
-	UParticleSystem* HitParticles;
 
 	/**
 	* Combat
 	*/
 
 
-	UPROPERTY()
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	AActor* CombatTarget;
 
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	double CombatRadius = 500.f;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	double AttackRadius = 150.f;
 
 	/**
@@ -96,7 +87,7 @@ public:
 	void Chase();
 
 	UFUNCTION(BlueprintCallable, Category = "AI Combat")
-	void StartAttacking();
+	float StartAttack();
 
 	UFUNCTION(BlueprintCallable, Category = "AI Combat")
 	void LoseInterest();
@@ -126,44 +117,18 @@ protected:
 	UHealthBar* HealthBarWidget;
 
 
-	/**
-	* Animations Montages
-	*/
-
-	UPROPERTY(EditAnywhere, Category = Animations)
-	UAnimMontage* HitMontage;
-
-	UPROPERTY(EditAnywhere, Category = Animations)
-	UAnimMontage* DeathMontage;
-
-	UPROPERTY(EditAnywhere, Category = Animations)
-	TArray<FName> DeathMontageSections;
-
-	UPROPERTY(EditAnywhere, Category = Animations)
-	UAnimMontage* AttackMontage;
-
-	UPROPERTY(EditAnywhere, Category = Animations)
-	TArray<FName> AttackMontageSections;
-
-	void PlayMontage(UAnimMontage* montage,const FName& sectionName = FName(NAME_None), bool bOverride = true);
-
-	
-
 	virtual void BeginPlay() override;
+	//virtual void Die() override;
+	virtual void Die_Implementation() override;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	EEnemyState State = EEnemyState::EES_Idle;
 //private:
 
-	UPROPERTY(VisibleAnywhere)
-	UAttributeComponent* Attributes;
+
 	UPROPERTY(VisibleAnywhere)
 	UBlackboardComponent* Blackboard;
 
-	UFUNCTION(BlueprintNativeEvent)
-	void Die();
-
-	void Die_Implementation();
 
 	bool InTargetRange(AActor* Target, double Radius);
 

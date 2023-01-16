@@ -26,10 +26,6 @@ void AMainAIController::OnPossess(APawn* InPawn)
 	{
 		AIPerception->OnPerceptionUpdated.AddDynamic(this, &AMainAIController::PerceptionUpdate);
 	}
-//	GetBlackboardComponent()->SetValue<UBlackboardKeyType_Object>(FKey(FName("")), this);
-
-
-//	GetBlackboardComponent()->SetValue(FKey(FName("")), this);
 }
 
 void AMainAIController::BeginPlay()
@@ -45,11 +41,7 @@ void AMainAIController::PerceptionUpdate(const TArray<AActor*>& UpdatedActors)
 	{
 		if (Actor->ActorHasTag(FName("PlayerCharacter")))
 		{
-			//State = EEnemyState::EES_Chasing;
-			//GetWorldTimerManager().ClearTimer(PatrolTimer);
-			//GetCharacterMovement()->MaxWalkSpeed = 300.f;
 			Enemy->CombatTarget = Actor;
-			//MoveToTarget(CombatTarget);
 			UE_LOG(LogTemp, Warning, TEXT("Seen Pawn, now Chasing"));
 		}
 	}

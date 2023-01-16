@@ -42,11 +42,8 @@ AMainCharacter::AMainCharacter()
 	Eyebrows = CreateDefaultSubobject<UGroomComponent>(TEXT("Eyebrows"));
 	Eyebrows->SetupAttachment(GetMesh());
 	Eyebrows->AttachmentName = FString("head");
-
 	AutoPossessPlayer = EAutoReceiveInput::Player0;
-	//DeathMontageSections.Add(FName("Death1"));
-	AttackMontageSections.Add(FName("Attack1"));
-	AttackMontageSections.Add(FName("Attack2"));
+
 }
 
 void AMainCharacter::BeginPlay()
@@ -154,32 +151,12 @@ void AMainCharacter::Attack()
 	}
 }
 
-void AMainCharacter::SetWeaponCollisionEnabled(ECollisionEnabled::Type CollisionEnabled)
-{
-	if (EquippedWeapon && EquippedWeapon->GetWeaponBox())
-	{
-		EquippedWeapon->GetWeaponBox()->SetCollisionEnabled(CollisionEnabled);
-		EquippedWeapon->IgnoreActors.Empty();
-	}
-}
 
 bool AMainCharacter::CanAttack()
 {
 	return AttackMontage && ActionState == EActionState::EAS_Unoccupied && CharacterState!=ECharacterState::ECS_Unequipped;
 }
 
-void AMainCharacter::PlayMontage(UAnimMontage* montage, const FName& sectionName, bool bOverride)
-{
-	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-	if (AnimInstance && montage)
-	{
-		AnimInstance->Montage_Play(montage,1.0f, EMontagePlayReturnType::MontageLength,0.0f, bOverride);
-		if (!sectionName.IsNone())
-		{
-			AnimInstance->Montage_JumpToSection(sectionName, montage);
-		}
-	}
-}
 void AMainCharacter::AttackEnd()
 {
 	ActionState = EActionState::EAS_Unoccupied;

@@ -38,13 +38,6 @@ void AItem::BeginPlay()
 
 	if(GEngine)
 	{
-	//	//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("before check")));
-	//UWorld* World = GetWorld();
-	//FVector Forward = GetActorForwardVector();
-	//FVector Location = GetActorLocation();
-	//DRAW_SPHERE(Location)
-	//DRAW_LINE(Location, Location + Forward * 100.f)
-	//DRAW_VECTOR(Location, Location + Forward * 100.f);
 
 	Sphere->OnComponentBeginOverlap.AddDynamic(this, &AItem::OnSphereOverlap);
 	Sphere->OnComponentEndOverlap.AddDynamic(this, &AItem::OnSphereEndOverlap);
@@ -88,7 +81,6 @@ void AItem::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* Ot
 			Player->SetOverlappingItem(this);
 		}
 	}	
-	//GEngine->AddOnScreenDebugMessage(1, 30.f, FColor::Red, OtherActorName);
 }
 
 void AItem::OnSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
