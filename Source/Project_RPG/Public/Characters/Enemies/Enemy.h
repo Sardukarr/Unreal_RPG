@@ -30,7 +30,7 @@ public:
 
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 
-
+	virtual void Destroyed() override;
 	/**
 	* Combat
 	*/
@@ -45,6 +45,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	double AttackRadius = 150.f;
+
+	UPROPERTY(EditAnywhere)
+		TSubclassOf<class AWeapon> WeaponClass;
 
 	/**
 	* AI

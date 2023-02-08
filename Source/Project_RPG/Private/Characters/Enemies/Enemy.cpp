@@ -9,6 +9,7 @@
 #include "Perception/PawnSensingComponent.h"
 #include "Components/MainAIController.h"
 #include "BehaviorTree/BlackboardComponent.h"
+#include "Items/Weapons/Weapon.h"
 
 #include "GameFramework/CharacterMovementComponent.h"
 #include "HUD/HealthBar.h"
@@ -53,7 +54,13 @@ void AEnemy::BeginPlay()
 	}
 
 	//MoveToTarget(PatrolTarget);
-
+	UWorld* World = GetWorld();
+	if (World && WeaponClass)
+	{
+		AWeapon* DefaultWeapon = World->SpawnActor<AWeapon>(WeaponClass);
+		DefaultWeapon->OnPickup(GetMesh(), this, this);
+		EquippedWeapon = DefaultWeapon;
+	}
 }
 
 void AEnemy::MoveToTarget(AActor* Target, float AcceptanceRadious)
@@ -295,4 +302,13 @@ void AEnemy::Die_Implementation()
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 	SetLifeSpan(120.f);
+}
+
+
+void AEnemy::Destroyed()
+{
+	if (EquippedWeapon)
+	{
+		EquippedWeapon->Destroy();
+	}
 }

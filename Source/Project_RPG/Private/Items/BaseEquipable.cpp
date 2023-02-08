@@ -54,6 +54,7 @@ void ABaseEquipable::OnUnequip(USceneComponent* InParent )
 void ABaseEquipable::AttachToSocket(USceneComponent* InParent, const FName& InSocketName)
 {
 	FAttachmentTransformRules TransformRules(EAttachmentRule::SnapToTarget, true);
+	TransformRules.ScaleRule = EAttachmentRule::KeepWorld;
 	RootComponent->AttachToComponent(InParent, TransformRules, InSocketName);
 
 }
