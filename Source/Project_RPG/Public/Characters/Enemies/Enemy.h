@@ -47,7 +47,7 @@ public:
 	double AttackRadius = 150.f;
 
 	UPROPERTY(EditAnywhere)
-		TSubclassOf<class AWeapon> WeaponClass;
+	TSubclassOf<class AWeapon> WeaponClass;
 
 	/**
 	* AI
