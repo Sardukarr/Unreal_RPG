@@ -44,12 +44,17 @@ protected:
 	UFUNCTION()
 	void BoxTrace(FHitResult& BoxHit);
 
+	UFUNCTION()
+	void ExecuteGetHit(FHitResult& BoxHit);
+
+	UFUNCTION()
+	bool ActorIsSameType(AActor* OtherActor);
+
 	UPROPERTY(EditAnywhere, Category = "Weapon Properties")
 	FVector BoxTraceExtent = FVector(5.f);
 
 	UPROPERTY(EditAnywhere, Category = "Weapon Properties")
 	bool bShowBoxDebug = false;
-
 
 
 	UPROPERTY(VisibleAnywhere, Category = "Weapon Properties")

@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "BaseCharacter.h"
-#include "CharacterTypes.h"
 #include "MainCharacter.generated.h"
 
 
@@ -32,7 +31,7 @@ public:
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-
+	virtual void GetHit_Implementation(const FVector& ImpactPoint) override;
 protected:
 
 	virtual void BeginPlay() override;
@@ -108,17 +107,10 @@ private:
 	UAnimMontage* EquipMontage;
 
 
-	/**
-	* States
-	*/
-	UPROPERTY(VisibleInstanceOnly)
-	ECharacterState CharacterState = ECharacterState::ECS_Unequipped;
-
 	UPROPERTY(VisibleInstanceOnly,BlueprintReadWrite, meta=(AllowPrivateAccess="true"))
 	EActionState ActionState = EActionState::EAS_Unoccupied;
 
 public:
 	FORCEINLINE void SetOverlappingItem(AItem* Item) { OverlappingItem = Item; }
-	FORCEINLINE ECharacterState GetCharacterState() const { return CharacterState; }
 
 };

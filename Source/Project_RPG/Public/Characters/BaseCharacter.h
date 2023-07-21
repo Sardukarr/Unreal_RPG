@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Interfaces/HitInterface.h"
+#include "CharacterTypes.h"
 #include "BaseCharacter.generated.h"
 
 
@@ -24,7 +25,11 @@ public:
 
 
 	UFUNCTION(BlueprintCallable)
-		void SetWeaponCollisionEnabled(ECollisionEnabled::Type CollisionEnabled);
+	void SetWeaponCollisionEnabled(ECollisionEnabled::Type CollisionEnabled);
+
+	void SpawnHitParticles(const FVector& ImpactPoint);
+	void PlayHitSound(const FVector& ImpactPoint);
+
 protected:
 
 	virtual void BeginPlay() override;
@@ -76,4 +81,13 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = VisualEffects)
 	UParticleSystem* HitParticles;
+
+	/**
+* States
+*/
+	UPROPERTY(VisibleInstanceOnly)
+		ECharacterState CharacterState = ECharacterState::ECS_Unequipped;
+
+public:
+	FORCEINLINE ECharacterState GetCharacterState() const { return CharacterState; }
 };

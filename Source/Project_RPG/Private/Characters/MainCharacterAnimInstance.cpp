@@ -10,11 +10,15 @@
 void UMainCharacterAnimInstance::NativeInitializeAnimation()
 {
 	Super::NativeInitializeAnimation();
-
+	
 	MainCharacter = Cast<AMainCharacter>(TryGetPawnOwner());
 	if (MainCharacter)
 	{
 		MainCharacterMovement = MainCharacter->GetCharacterMovement();
+	}
+	else if(TryGetPawnOwner())
+	{
+		ControlledByAI = true;
 	}
 }
 
@@ -24,8 +28,12 @@ void UMainCharacterAnimInstance::NativeUpdateAnimation(float DeltaTime)
 
 	if (MainCharacterMovement)
 	{
-		GroundSpeed = UKismetMathLibrary::VSizeXY(MainCharacterMovement->Velocity);
+		GroundSpeed = UKismetMathLibrary::VSizeXY(TryGetPawnOwner()->GetVelocity());
 		IsFalling = MainCharacterMovement->IsFalling();
 		CharacterState = MainCharacter->GetCharacterState();
+	}
+	else if (ControlledByAI)
+	{
+		GroundSpeed = UKismetMathLibrary::VSizeXY(TryGetPawnOwner()->GetVelocity());
 	}
 }

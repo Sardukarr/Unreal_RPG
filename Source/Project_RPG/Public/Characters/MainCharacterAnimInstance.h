@@ -31,6 +31,8 @@ public:
 
 	UPROPERTY(BlueprintReadOnly, Category = Movement)
 	bool IsFalling;
+	UPROPERTY(BlueprintReadOnly, Category = Movement)
+	bool ControlledByAI=false;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Movement | Character State")
 	ECharacterState CharacterState;

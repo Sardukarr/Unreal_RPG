@@ -17,7 +17,7 @@
 #include "Project_RPG/DebugMacros.h"
 
 #include "Kismet/KismetSystemLibrary.h"
-#include "Kismet/GameplayStatics.h"
+
 
 
 AEnemy::AEnemy()
@@ -40,7 +40,8 @@ AEnemy::AEnemy()
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = false;
 	bUseControllerRotationRoll = false;
-	
+
+	Tags.Add(FName("Enemy"));
 }
 
 void AEnemy::BeginPlay()
@@ -279,25 +280,10 @@ void AEnemy::GetHit_Implementation(const FVector& ImpactPoint)
 	{
 		Die();
 	}
-
-	if (HitSound)
-	{
-		UGameplayStatics::PlaySoundAtLocation(
-			this,
-			HitSound,
-			ImpactPoint
-		);
-	}
-	if (HitParticles && GetWorld())
-	{
-		UGameplayStatics::SpawnEmitterAtLocation(
-			GetWorld(),
-			HitParticles,
-			ImpactPoint
-		);
-	}
-
+	PlayHitSound(ImpactPoint);
+	SpawnHitParticles(ImpactPoint);
 }
+
 
 
 float AEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
