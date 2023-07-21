@@ -48,10 +48,7 @@ void AEnemy::BeginPlay()
 	Super::BeginPlay();
 	EnemyAIController = Cast<AMainAIController>(GetController());
 	Blackboard = EnemyAIController->GetBlackboardComponent();
-	if (HealthBarWidget)
-	{
-		HealthBarWidget->SetVisibility(false);
-	}
+	ToggleHealthBar(false);
 
 	//MoveToTarget(PatrolTarget);
 	UWorld* World = GetWorld();
@@ -146,7 +143,7 @@ void AEnemy::Chase()
 {
 	// Outside attack range, chase character
 	State = EEnemyState::EES_Chasing;
-	//GetCharacterMovement()->MaxWalkSpeed = 300.f;
+	GetCharacterMovement()->MaxWalkSpeed = ChaseSpeed;
 	//MoveToTarget(CombatTarget);
 }
 
@@ -164,6 +161,43 @@ float AEnemy::StartAttack()
 	return 0.0f;
 }
 
+bool AEnemy::CanAttack()
+{
+	bool bCanAttack =
+		IsInsideRadius(CombatRadius) &&
+		!IsAttacking() &&
+		!IsBusy() &&
+		!IsDead();
+	return bCanAttack;
+}
+
+
+bool AEnemy::IsInsideRadius(double Radious)
+{
+	return InTargetRange(CombatTarget, Radious);
+}
+
+bool AEnemy::IsChasing()
+{
+	return State == EEnemyState::EES_Chasing;
+}
+
+bool AEnemy::IsAttacking()
+{
+	return State == EEnemyState::EES_Attacking;
+}
+
+bool AEnemy::IsDead()
+{
+	return State == EEnemyState::EES_Dead;
+}
+
+bool AEnemy::IsBusy()
+{
+	return State == EEnemyState::EES_Busy;
+}
+
+
 void AEnemy::LoseInterest()
 {
 	CombatTarget = nullptr;
@@ -171,12 +205,9 @@ void AEnemy::LoseInterest()
 	{
 		//Blackboard->SetValueAsObject(FName("CombatTarget"), nullptr);
 	}
-	if (HealthBarWidget)
-	{
-		HealthBarWidget->SetVisibility(false);
-	}
+	ToggleHealthBar(false);
 	State = EEnemyState::EES_Patrolling;
-	//GetCharacterMovement()->MaxWalkSpeed = 125.f;
+	GetCharacterMovement()->MaxWalkSpeed = PatrolSpeed;
 	//MoveToTarget(PatrolTarget);
 }
 
@@ -204,23 +235,27 @@ bool AEnemy::InTargetRange(AActor* Target, double Radius)
 
 }
 
+void AEnemy::ToggleHealthBar(bool show)
+{
+	if (HealthBarWidget)
+	{
+		HealthBarWidget->SetVisibility(show);
+	}
+}
+
 void AEnemy::PawnSeen(APawn* SeenPawn)
 {
-	if (State == EEnemyState::EES_Chasing|| State== EEnemyState::EES_Dead) return;
-	if (SeenPawn->ActorHasTag(FName("PlayerCharacter")))
+	const bool bShouldChaseTarget =
+		State != EEnemyState::EES_Dead &&
+		State != EEnemyState::EES_Chasing &&
+		State < EEnemyState::EES_Attacking &&
+		SeenPawn->ActorHasTag(FName("PlayerCharacter"));
+
+	if (bShouldChaseTarget)
 	{
-		//GetWorldTimerManager().ClearTimer(PatrolTimer);
-		//GetCharacterMovement()->MaxWalkSpeed = 300.f;
+		GetWorldTimerManager().ClearTimer(PatrolTimer);
 		CombatTarget = SeenPawn;
-		if (Blackboard)
-		{
-	//		Blackboard->SetValueAsObject(FName("CombatTarget"), SeenPawn);
-		}
-		if (State != EEnemyState::EES_Attacking)
-		{
-			State = EEnemyState::EES_Chasing;
-			MoveToTarget(CombatTarget);
-		}
+		Chase();
 	}
 }
 
@@ -232,11 +267,8 @@ void AEnemy::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 void AEnemy::GetHit_Implementation(const FVector& ImpactPoint)
 {
-	if (HealthBarWidget)
-	{
-		HealthBarWidget->SetVisibility(true);
-	}
 
+	ToggleHealthBar(true);
 
 	if (Attributes && Attributes->IsAlive())
 	{
@@ -295,10 +327,7 @@ void AEnemy::Die_Implementation()
 	}
 	State = EEnemyState::EES_Dead;
 
-	if (HealthBarWidget)
-	{
-		HealthBarWidget->SetVisibility(false);
-	}
+	ToggleHealthBar(false);
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 	SetLifeSpan(120.f);

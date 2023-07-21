@@ -35,30 +35,9 @@ void AWeapon::BeginPlay()
 
 void AWeapon::OnBoxOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	TArray<AActor*> ActorsToIgnore;
-	ActorsToIgnore.Add(this);
-	ActorsToIgnore.Add(GetOwner());
-	for (AActor* Actor : IgnoreActors)
-	{
-		ActorsToIgnore.AddUnique(Actor);
-	}
-
-
 	FHitResult BoxHit;
-	UKismetSystemLibrary::BoxTraceSingle(
-		this,
-		BoxTraceStart->GetComponentLocation(),
-		BoxTraceEnd->GetComponentLocation(),
-		FVector(5.f, 5.f, 5.f),
-		BoxTraceStart->GetComponentRotation(),
-		ETraceTypeQuery::TraceTypeQuery1,
-		false,
-		ActorsToIgnore,
-		EDrawDebugTrace::None,
-		BoxHit,
-		true
-	);
-	if(BoxHit.GetActor())
+	BoxTrace(BoxHit);
+	if (BoxHit.GetActor())
 	{
 		UGameplayStatics::ApplyDamage(
 			BoxHit.GetActor(),
@@ -73,30 +52,37 @@ void AWeapon::OnBoxOverlap(UPrimitiveComponent* OverlappedComponent, AActor* Oth
 		{
 			HitInterface->Execute_GetHit(BoxHit.GetActor(), BoxHit.ImpactPoint);
 		}
-		IgnoreActors.AddUnique(BoxHit.GetActor());
+
 
 		CreateForceFields(BoxHit.ImpactPoint);
-	
+
 	}
 }
-
-void AWeapon::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+void AWeapon::BoxTrace(FHitResult& BoxHit)
 {
-	Super::OnSphereOverlap(OverlappedComponent, OtherActor, OtherComp, OtherBodyIndex, bFromSweep, SweepResult);
-	AMainCharacter* Player = Cast<AMainCharacter>(OtherActor);
-	if (Player)
+	TArray<AActor*> ActorsToIgnore;
+	ActorsToIgnore.Add(this);
+	ActorsToIgnore.Add(GetOwner());
+	for (AActor* Actor : IgnoreActors)
 	{
-		FAttachmentTransformRules TransformRules(EAttachmentRule::SnapToTarget, true);
-		//ItemMesh->AttachToComponent(Player->GetMesh(), TransformRules, FName("RightHandSocket"));
-		Player->SetOverlappingItem(this);
-
+		ActorsToIgnore.AddUnique(Actor);
 	}
-}
 
+	UKismetSystemLibrary::BoxTraceSingle(
+		this,
+		BoxTraceStart->GetComponentLocation(),
+		BoxTraceEnd->GetComponentLocation(),
+		BoxTraceExtent,
+		BoxTraceStart->GetComponentRotation(),
+		ETraceTypeQuery::TraceTypeQuery1,
+		false,
+		ActorsToIgnore,
+		bShowBoxDebug ? EDrawDebugTrace::ForDuration : EDrawDebugTrace::None,
+		BoxHit,
+		true
+	);
+	IgnoreActors.AddUnique(BoxHit.GetActor());
 
-void AWeapon::OnSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
-{
-	Super::OnSphereEndOverlap(OverlappedComponent, OtherActor, OtherComp, OtherBodyIndex);
 }
 
 void AWeapon::OnEquip(USceneComponent* InParent)

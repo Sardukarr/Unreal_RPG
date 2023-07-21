@@ -59,8 +59,22 @@ public:
 	/*UPROPERTY(VisibleAnywhere)
 	UPawnSensingComponent* PawnSensing;*/
 
+	void ToggleHealthBar(bool show);
+
 	UFUNCTION()
 	void PawnSeen(APawn* SeenPawn);
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AI")
+	float ChaseSpeed = 300.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AI")
+	float PatrolSpeed = 125.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AI")
+	float WaitMin = 5.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AI")
+	float WaitMax = 10.f;
 
 	/**
 	* Navigation
@@ -92,16 +106,26 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "AI Combat")
 	float StartAttack();
 
+	virtual bool CanAttack() override;
+
 	UFUNCTION(BlueprintCallable, Category = "AI Combat")
 	void LoseInterest();
 
+	UFUNCTION(BlueprintCallable, Category = "AI Combat")
+	bool IsInsideRadius(double Radius);
 
+	UFUNCTION(BlueprintCallable, Category = "AI Combat")
+	bool IsChasing();
 
-	UPROPERTY(EditAnywhere, Category = "AI Navigation")
-	float WaitMin = 5.f;
+	UFUNCTION(BlueprintCallable, Category = "AI Combat")
+	bool IsAttacking();
 
-	UPROPERTY(EditAnywhere, Category = "AI Navigation")
-	float WaitMax = 10.f;
+	UFUNCTION(BlueprintCallable, Category = "AI Combat")
+	bool IsDead();
+
+	UFUNCTION(BlueprintCallable, Category = "AI Combat")
+	bool IsBusy();
+
 
 
 	UFUNCTION(BlueprintCallable, Category = "AI Navigation")

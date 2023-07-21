@@ -25,6 +25,31 @@ void ABaseEquipable::OnPickup(USceneComponent* InParent, AActor* NewOwner, APawn
 	SetOwner(NewOwner);
 	SetInstigator(NewInstigator);
 
+	PlayEquipSound();
+	DisableSphereCollision();
+	DisablePickableEffect();
+
+
+}
+
+void ABaseEquipable::DisablePickableEffect()
+{
+	if (SparksEffect)
+	{
+		SparksEffect->Deactivate();
+	}
+}
+
+void ABaseEquipable::DisableSphereCollision()
+{
+	if (Sphere)
+	{
+		Sphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
+}
+
+void ABaseEquipable::PlayEquipSound()
+{
 	if (EquipSound)
 	{
 		UGameplayStatics::PlaySoundAtLocation(
@@ -33,17 +58,6 @@ void ABaseEquipable::OnPickup(USceneComponent* InParent, AActor* NewOwner, APawn
 			GetActorLocation()
 		);
 	}
-	if (Sphere)
-	{
-		Sphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	}
-	if (SparksEffect)
-	{
-		SparksEffect->Deactivate();
-	}
-
-
-
 }
 
 void ABaseEquipable::OnUnequip(USceneComponent* InParent )

@@ -16,6 +16,9 @@ class PROJECT_RPG_API ABaseEquipable : public AItem
 public:
 	UFUNCTION(BlueprintCallable)
 	virtual void OnPickup(USceneComponent* InParent, AActor* NewOwner, APawn* NewInstigator);
+	void DisablePickableEffect();
+	void DisableSphereCollision();
+	void PlayEquipSound();
 	UFUNCTION(BlueprintCallable)
 	virtual void OnEquip(USceneComponent* InParent);
 	UFUNCTION(BlueprintCallable)
