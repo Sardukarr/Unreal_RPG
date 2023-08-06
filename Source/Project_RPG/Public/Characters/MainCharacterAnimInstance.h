@@ -13,7 +13,7 @@
 
 
 UCLASS()
-class PROJECT_RPG_API UMainCharacterAnimInstance : public UAnimInstance
+class PROJECT_RPG_API UMainCharacterAnimInstance : public UAnimInstance, public IAnimActionsInterface
 {
 	GENERATED_BODY()
 public:

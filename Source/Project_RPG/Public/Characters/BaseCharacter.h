@@ -79,6 +79,9 @@ protected:
 	UPROPERTY(EditAnywhere, Category = Sounds)
 	USoundBase* HitSound;
 
+	UPROPERTY(EditAnywhere,BlueprintReadOnly, Category = Sounds)
+	USoundBase* HitReactSound;
+
 	UPROPERTY(EditAnywhere, Category = VisualEffects)
 	UParticleSystem* HitParticles;
 
