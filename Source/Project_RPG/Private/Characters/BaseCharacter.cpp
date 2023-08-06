@@ -133,3 +133,15 @@ void ABaseCharacter::PlayHitSound(const FVector& ImpactPoint)
 		);
 	}
 }
+
+
+void ABaseCharacter::GetHit_Implementation(const FVector& ImpactPoint)
+{
+	PlayHitSound(ImpactPoint);
+	SpawnHitParticles(ImpactPoint);
+	if (Attributes && Attributes->IsAlive())
+	{
+		DirectionalHit(ImpactPoint);
+
+	}
+}

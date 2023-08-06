@@ -65,13 +65,14 @@ protected:
 	/**
 	* Animations
 	*/
-		virtual void AttackEnd() override;
+	virtual void AttackEnd() override;
 	UFUNCTION(BlueprintCallable)
 	void Disarm();
 	UFUNCTION(BlueprintCallable)
 	void Arm();
 	UFUNCTION(BlueprintCallable)
 	void ResetCharacterState();
+
 
 	virtual bool CanAttack() override;
 private:

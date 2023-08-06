@@ -9,6 +9,7 @@
 #include "Components/BoxComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "GroomComponent.h"
+
 #include "Camera/CameraComponent.h"
 #include "Items/Weapons/Weapon.h"
 
@@ -205,8 +206,7 @@ void AMainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 
 void AMainCharacter::GetHit_Implementation(const FVector& ImpactPoint)
 {
-
-	PlayHitSound(ImpactPoint);
-	SpawnHitParticles(ImpactPoint);
+	Super::GetHit_Implementation(ImpactPoint);
+	ActionState = EActionState::EAS_HitReaction;
 }
 

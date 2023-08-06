@@ -269,19 +269,9 @@ void AEnemy::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 void AEnemy::GetHit_Implementation(const FVector& ImpactPoint)
 {
 
-	ToggleHealthBar(true);
-
-	if (Attributes && Attributes->IsAlive())
-	{
-		DirectionalHit(ImpactPoint);
-
-	}
-	else
-	{
-		Die();
-	}
-	PlayHitSound(ImpactPoint);
-	SpawnHitParticles(ImpactPoint);
+	ToggleHealthBar(!IsDead());
+	Super::GetHit_Implementation(ImpactPoint);
+	GetWorldTimerManager().ClearTimer(PatrolTimer);
 }
 
 
@@ -315,7 +305,7 @@ void AEnemy::Die_Implementation()
 
 	ToggleHealthBar(false);
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-
+	SetWeaponCollisionEnabled(ECollisionEnabled::NoCollision);
 	SetLifeSpan(120.f);
 }
 

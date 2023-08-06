@@ -42,6 +42,8 @@ protected:
 
 	virtual void Die_Implementation();
 
+	virtual void GetHit_Implementation(const FVector& ImpactPoint)override;
+
 	UFUNCTION(BlueprintCallable)
 	virtual void AttackEnd();
 
