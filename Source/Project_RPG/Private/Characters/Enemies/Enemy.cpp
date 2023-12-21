@@ -68,7 +68,7 @@ void AEnemy::MoveToTarget(AActor* Target, float AcceptanceRadious)
 	MoveRequest.SetGoalActor(Target);
 	MoveRequest.SetAcceptanceRadius(AcceptanceRadious);
 	FNavPathSharedPtr NavPath;
-	EnemyAIController->MoveTo(MoveRequest, &NavPath);
+	//EnemyAIController->MoveTo(MoveRequest, &NavPath);
 }
 
 AActor* AEnemy::ChooseRandomPatrolTarget()
@@ -266,11 +266,11 @@ void AEnemy::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 }
 
-void AEnemy::GetHit_Implementation(const FVector& ImpactPoint)
+void AEnemy::GetHit_Implementation(const FHitResult& Hit, AActor* Hitter)
 {
 
 	ToggleHealthBar(!IsDead());
-	Super::GetHit_Implementation(ImpactPoint);
+	Super::GetHit_Implementation(Hit, Hitter);
 	GetWorldTimerManager().ClearTimer(PatrolTimer);
 }
 
